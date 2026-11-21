@@ -1,10 +1,34 @@
 import*as f from'node:fs'
-const I=process.env.MAKEFUN_INPUT_DIR??'/input',O=process.env.MAKEFUN_OUTPUT_DIR??'/output'
-const p=t=>{const r=t.split('\n'),w=r[0].length,n=w*r.length,A=new Uint8Array(n).fill(1),G=new Uint8Array(n),B=[];let P=0;r.map((s,y)=>{for(let x=0;x<s.length;x++){const c=s[x],i=y*w+x;if(c=='#')continue;A[i]=0;if('.*+'.includes(c))G[i]=1;if('$*'.includes(c))B.push(i);if('@+'.includes(c))P=i}});for(let i=0;i<n;i++)if(i<w||i>=n-w||!(i%w)||i%w==w-1)A[i]=1;return{w,A,G,B,P}}
-const v=l=>{const{w,A,G}=l,V=new Uint8Array(A.length),Q=[];for(let i=0;i<A.length;i++)if(G[i])V[i]=1,Q.push(i);for(let k=0;k<Q.length;k++){const x=Q[k];for(const d of[-w,w,-1,1]){const y=x-d;if(!A[y]&&!A[y-d]&&!V[y])V[y]=1,Q.push(y)}}return V}
-const r=(l,o,f,S,s,K)=>{const{w,A}=l;let m=f,n=0;K[n++]=f;S[f]=s;while(n){const q=K[--n];if(q<m)m=q;for(const d of[-w,w,-1,1]){const z=q+d;if(!A[z]&&!o[z]&&S[z]!=s)S[z]=s,K[n++]=z}}return m}
-const k=(l,o,f,t)=>{const{w,A}=l;if(f==t)return'';const P=new Int32Array(A.length).fill(-1),H=[],Q=[f];P[f]=f;for(let i=0;i<Q.length;i++){const q=Q[i];for(let j=0;j<4;j++){const z=q+[-w,w,-1,1][j];if(A[z]||o[z]||P[z]!=-1)continue;P[z]=q;H[z]='udlr'[j];Q.push(z)}}let m='';for(let i=t;i!=f;i=P[i])m=H[i]+m;return m}
-const s=(l,V)=>{const{w,A,G,B:b,P}=l,n=A.length,o=new Uint8Array(n),E=new Int32Array(n),T=new Int32Array(n),K=new Int32Array(n),d4=[-w,w,-1,1],ok=x=>x.every(b=>G[b]);let t=0;const X=[[b,P,-1]],H=new Set;for(const x of b)o[x]=1;H.add(P+','+b);for(const x of b)o[x]=0;let f=ok(b)?0:-1;for(let h=0;f<0&&h<X.length;h++){const[bs,pp]=X[h];for(const x of bs)o[x]=1;r(l,o,pp,E,++t,K);const u=t;for(let i=0;i<bs.length;i++){const x=bs[i];for(const d of d4){const z=x+d;if(E[x-d]!=u||A[z]||o[z]||!V[z])continue;o[x]=0;o[z]=1;const c=bs.slice();c[i]=z;c.sort();const y=r(l,o,x,T,++t,K)+','+c;o[z]=0;o[x]=1;if(H.has(y))continue;H.add(y);X.push([c,x,h]);if(ok(c)){f=X.length-1;break}}}for(const x of bs)o[x]=0}if(f<0)return;const L=[];for(let i=f;i>0;i=X[i][2])L.push(i);L.reverse();let m='',at=P,bs=b;for(const i of L){const[c,fr]=X[i],to=c.find(x=>!bs.includes(x)),d=to-fr,dr=d4.indexOf(d);for(const x of bs)o[x]=1;m+=k(l,o,at,fr-d);for(const x of bs)o[x]=0;m+='UDLR'[dr];at=fr;bs=c}return{m,at}}
-const q=l=>{const{w,A,G,B,P}=l,n=A.length,cu=new Uint8Array(n),row=P/w|0;cu.fill(1,row*w,row*w+w);const pt=new Int32Array(n).fill(-1),rs=[];for(let s=0;s<n;s++){if(A[s]||cu[s]||pt[s]>=0)continue;const Q=[s];pt[s]=rs.length;for(let i=0;i<Q.length;i++)for(const d of[-w,w,-1,1]){const z=Q[i]+d;if(!A[z]&&!cu[z]&&pt[z]<0)pt[z]=rs.length,Q.push(z)}rs.push({B:[],G:[]})}for(const x of B)rs[pt[x]].B.push(x);for(let i=0;i<n;i++)if(G[i]&&pt[i]>=0)rs[pt[i]].G.push(i);return rs.filter(r=>r.B.length)}
-const z=l=>{const rs=q(l);let at=l.P,m='';for(const a of rs){const A=l.A.slice();for(const o of rs)if(o!=a)for(const b of o.done?o.G:o.B)A[b]=1;const t={w:l.w,A,G:l.G,B:a.B.slice(),P:at},g=s(t,v(t));if(!g)return'';m+=g.m;at=g.at;a.done=1}return m}
-for(const id of f.readdirSync(I).sort()){let m='';try{m=z(p(f.readFileSync(I+'/'+id+'/level.txt','utf8')))}catch{}f.mkdirSync(O+'/'+id,{recursive:!0});f.writeFileSync(O+'/'+id+'/solution.txt',m+'\n')}
+const I='/input',O='/output'
+const S=(A,G,b,p,w,L)=>{const d=[-w,w,-1,1],X=[[b,p,-1,'']],seen=new Set([p+'|'+b]),R=i=>{let m='';for(;i>0;i=X[i][2])m=X[i][3]+m;return m}
+let Z=[0]
+while(Z.length){const nx=[]
+for(const i of Z){const q=X[i][1],bs=X[i][0]
+for(let j=0;j<4;j++){const e=d[j],z=q+e;if(A[z])continue
+if(bs.includes(z)){const y=z+e;if(A[y]||bs.includes(y)||!L[y])continue
+const b2=bs.map(v=>v==z?y:v).sort(),k=z+'|'+b2
+if(seen.has(k))continue
+seen.add(k);X.push([b2,z,i,'UDLR'[j]])
+if(b2.every(v=>G[v]))return[R(X.length-1),z]
+nx.push(X.length-1)}
+else{const k=z+'|'+bs;if(seen.has(k))continue
+seen.add(k);X.push([bs,z,i,'udlr'[j]]);Z.push(X.length-1)}}}
+Z=nx}}
+for(const id of f.readdirSync(I).sort()){let M=''
+try{const s=f.readFileSync(I+'/'+id+'/level.txt','utf8'),w=s.indexOf('\n'),z=s.replace(/\n/g,''),n=z.length,W=[...z].map(c=>+(c=='#')),G=[...z].map(c=>+('.*+'.includes(c))),B=[...z].map((c,i)=>'$*'.includes(c)?i:-1).filter(i=>i>=0),P=z.search(/[@+]/),hr=P/w|0,d=[-w,w,-1,1],L=new Uint8Array(n),D=new Uint8Array(n),V=new Uint8Array(n),Q=[]
+for(let i=0;i<n;i++)if(G[i])L[i]=1,Q.push(i)
+for(let i=0;i<Q.length;i++)for(const e of d){const y=Q[i]-e;if(!W[y]&&!W[y-e]&&!L[y])L[y]=1,Q.push(y)}
+let at=P,k=0
+for(const b of B)D[b]=1
+for(const b of B){if(V[b])continue
+k++
+const q2=[b],bs=[];V[b]=k
+for(let i=0;i<q2.length;i++){const q=q2[i];if(D[q])bs.push(q);for(const e of d){const y=q+e;if(W[y]||V[y]==k||((y/w|0)==hr&&!L[y]))continue;V[y]=k;q2.push(y)}}
+for(const x of bs)D[x]=0
+const A=W.map((v,i)=>v|D[i]);A[at]=0
+const r=S(A,G,bs,at,w,L)
+if(!r)throw 0
+M+=r[0];at=r[1]
+for(const y of q2)if(G[y])D[y]=1}
+}catch{}
+f.mkdirSync(O+'/'+id,{recursive:!0});f.writeFileSync(O+'/'+id+'/solution.txt',M)}
