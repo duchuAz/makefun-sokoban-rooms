@@ -1,7 +1,7 @@
 import*as f from'node:fs'
 let p
-const S=(A,G,b,p,d,L)=>{const H={[p+'|'+b]:1}
-let Z=[[p,b,'']]
+const S=(A,G,b,p,d,L,M)=>{const H={[p+'|'+b]:1}
+let Z=[[p,b,M]]
 while(Z.length){const nx=[]
 for(const[q,bs,m]of Z){
 for(let j=0;j<4;j++){const e=d[j],z=q+e,m2=m+'udlr'[j];if(A[z])continue
@@ -19,13 +19,11 @@ try{const s=f.readFileSync('/input/'+id+'/level.txt')+'',w=s.search(/\n/),z=s.re
 for(const q of Q)for(const e of d){const y=q-e;W[y]||W[y-e]||L[y]||(L[y]=1,Q.push(y))}
 let at=P
 for(const b of B)D[b]=1
-for(const b of B){if(V[b])continue
+for(const b of B)if(!V[b]){
 const q2=[b],bs=[];V[b]=1
-for(const q of q2){D[q]&&bs.push(q);for(const e of d){const y=q+e;W[y]||V[y]||((y/w|0)==hr&&!L[y])||(V[y]=1,q2.push(y))}}
+for(const q of q2){D[q]&&bs.push(q);for(const e of d){const y=q+e;W[y]||V[y]||(y/w|0)==hr&&!L[y]||(V[y]=1,q2.push(y))}}
 const A=W.map((v,i)=>v|(D[i]&&!bs.includes(i)));A[at]=0
-const r=S(A,G,bs,at,d,L)
-if(!r)throw 0
-M+=r[0];at=r[1]
+;[M,at]=S(A,G,bs,at,d,L,M)
 for(const y of q2)D[y]=G[y]}
 }catch{}
 f.mkdirSync(p='/output/'+id,{recursive:!0});f.writeFileSync(p+'/solution.txt',M)}
